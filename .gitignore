@@ -3,3 +3,8 @@ __pycache__/
 *.pyc
 .DS_Store
 .streamlit/
+
+data/process_data.csv
+logs/boiler_data.csv
+logs/alarms.csv
+logs/test_boiler_data.csv
