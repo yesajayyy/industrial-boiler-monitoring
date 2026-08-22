@@ -1,4 +1,13 @@
+import sys
 import os
+
+PROJECT_ROOT = os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))
+)
+
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 import time
 from datetime import datetime
 
@@ -17,7 +26,6 @@ from safety.safety_system import SafetySystem
 
 st.set_page_config(
     page_title="Industrial Boiler Monitoring System",
-    page_icon="🏭",
     layout="wide"
 )
 
@@ -26,8 +34,8 @@ st.set_page_config(
 # CONSTANTS
 # ============================================================
 
-DATA_DIR = "data"
-LOG_DIR = "logs"
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
+LOG_DIR = os.path.join(PROJECT_ROOT, "logs")
 
 DATA_FILE = os.path.join(DATA_DIR, "process_data.csv")
 ALARM_FILE = os.path.join(LOG_DIR, "alarms.csv")
@@ -37,7 +45,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 
 
 # ============================================================
-# INITIALIZE SYSTEM
+# SESSION STATE INITIALIZATION
 # ============================================================
 
 if "boiler" not in st.session_state:
@@ -65,7 +73,7 @@ safety = st.session_state.safety
 
 
 # ============================================================
-# FUNCTIONS
+# DATA LOGGING
 # ============================================================
 
 def save_process_data(sensor_data, safety_result, outputs):
@@ -123,6 +131,10 @@ def save_alarm(alarm):
         )
 
 
+# ============================================================
+# CHART CREATION
+# ============================================================
+
 def create_chart(history, column, title, y_title):
 
     if not history:
@@ -146,7 +158,12 @@ def create_chart(history, column, title, y_title):
         xaxis_title="Simulation Cycle",
         yaxis_title=y_title,
         height=300,
-        margin=dict(l=20, r=20, t=50, b=20)
+        margin=dict(
+            l=20,
+            r=20,
+            t=50,
+            b=20
+        )
     )
 
     st.plotly_chart(
@@ -159,25 +176,33 @@ def create_chart(history, column, title, y_title):
 # PROCESS UPDATE
 # ============================================================
 
+sensor_data = boiler.get_sensor_data()
+
+safety_result = safety.evaluate(sensor_data)
+
+outputs = controller.control(
+    sensor_data,
+    safety_result["status"]
+)
+
+
+# ============================================================
+# APPLY CONTROLLER OUTPUTS
+# ============================================================
+
+boiler.heater_on = outputs["heater_on"]
+boiler.pump_on = outputs["pump_on"]
+boiler.valve_position = outputs["valve_position"]
+
+
+# ============================================================
+# UPDATE SIMULATION
+# ============================================================
+
 if st.session_state.running:
-
-    sensor_data = boiler.get_sensor_data()
-
-    safety_result = safety.evaluate(sensor_data)
-
-    outputs = controller.control(
-        sensor_data,
-        safety_result["status"]
-    )
-
-    # Apply controller outputs to the process
-    boiler.heater_on = outputs["heater_on"]
-    boiler.pump_on = outputs["pump_on"]
-    boiler.valve_position = outputs["valve_position"]
 
     st.session_state.cycle += 1
 
-    # Store history
     history_row = {
         "cycle": st.session_state.cycle,
         "temperature": sensor_data["temperature"],
@@ -188,22 +213,18 @@ if st.session_state.running:
 
     st.session_state.history.append(history_row)
 
-    # Keep last 60 points on screen
     if len(st.session_state.history) > 60:
         st.session_state.history.pop(0)
 
-    # Save process data
     save_process_data(
         sensor_data,
         safety_result,
         outputs
     )
 
-    # Save alarms
     for alarm in safety_result["alarms"]:
         save_alarm(alarm)
 
-    # Advance physical process
     boiler.update()
 
 
@@ -211,11 +232,11 @@ if st.session_state.running:
 # HEADER
 # ============================================================
 
-st.title("🏭 Industrial Boiler Monitoring System")
+st.title("Industrial Boiler Monitoring System")
 
 st.caption(
-    "Real-Time Process Simulation • PLC-Style Control • "
-    "Safety Interlocks • Data Logging"
+    "Real-Time Process Simulation | PLC-Style Control | "
+    "Safety Interlocks | Data Logging"
 )
 
 
@@ -226,39 +247,64 @@ st.caption(
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    if st.button("▶ Start System", use_container_width=True):
+
+    if st.button(
+        "Start System",
+        use_container_width=True
+    ):
         st.session_state.running = True
         st.rerun()
 
+
 with col2:
-    if st.button("⏸ Stop System", use_container_width=True):
+
+    if st.button(
+        "Stop System",
+        use_container_width=True
+    ):
         st.session_state.running = False
         st.rerun()
 
+
 with col3:
-    if st.button("🔄 Reset System", use_container_width=True):
+
+    if st.button(
+        "Reset System",
+        use_container_width=True
+    ):
+
         st.session_state.boiler = BoilerSimulator()
         st.session_state.controller = BoilerController()
         st.session_state.safety = SafetySystem()
+
         st.session_state.history = []
         st.session_state.cycle = 0
+        st.session_state.running = True
+
         st.rerun()
 
 
 # ============================================================
-# STATUS
+# SAFETY STATUS
 # ============================================================
 
-status = safety.status
+st.subheader("Safety Status")
 
-if status == "NORMAL":
-    st.success("🟢 SAFETY STATUS: NORMAL")
+if safety_result["status"] == "NORMAL":
+
+    st.success(
+        "SAFETY STATUS: NORMAL"
+    )
+
 else:
-    st.error("🔴 SAFETY STATUS: EMERGENCY")
+
+    st.error(
+        "SAFETY STATUS: EMERGENCY"
+    )
 
 
 # ============================================================
-# SENSOR CARDS
+# PROCESS MEASUREMENTS
 # ============================================================
 
 st.subheader("Process Measurements")
@@ -266,26 +312,30 @@ st.subheader("Process Measurements")
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
+
     st.metric(
-        "🌡️ Temperature",
+        "Temperature",
         f"{sensor_data['temperature']:.2f} °C"
     )
 
 with c2:
+
     st.metric(
-        "🫧 Pressure",
+        "Pressure",
         f"{sensor_data['pressure']:.2f} bar"
     )
 
 with c3:
+
     st.metric(
-        "💧 Water Level",
+        "Water Level",
         f"{sensor_data['level']:.2f} %"
     )
 
 with c4:
+
     st.metric(
-        "💨 Flow",
+        "Flow",
         f"{sensor_data['flow']:.2f} L/min"
     )
 
@@ -299,26 +349,29 @@ st.subheader("Actuator Status")
 a1, a2, a3 = st.columns(3)
 
 with a1:
+
     st.metric(
-        "🔥 Heater",
+        "Heater",
         "ON" if outputs["heater_on"] else "OFF"
     )
 
 with a2:
+
     st.metric(
-        "🚰 Feed Pump",
+        "Feed Pump",
         "ON" if outputs["pump_on"] else "OFF"
     )
 
 with a3:
+
     st.metric(
-        "🔧 Control Valve",
+        "Control Valve",
         f"{outputs['valve_position']:.1f} %"
     )
 
 
 # ============================================================
-# PROCESS TRENDS
+# REAL-TIME PROCESS TRENDS
 # ============================================================
 
 st.subheader("Real-Time Process Trends")
@@ -326,6 +379,7 @@ st.subheader("Real-Time Process Trends")
 chart1, chart2 = st.columns(2)
 
 with chart1:
+
     create_chart(
         st.session_state.history,
         "temperature",
@@ -334,6 +388,7 @@ with chart1:
     )
 
 with chart2:
+
     create_chart(
         st.session_state.history,
         "pressure",
@@ -345,6 +400,7 @@ with chart2:
 chart3, chart4 = st.columns(2)
 
 with chart3:
+
     create_chart(
         st.session_state.history,
         "level",
@@ -353,6 +409,7 @@ with chart3:
     )
 
 with chart4:
+
     create_chart(
         st.session_state.history,
         "flow",
@@ -370,10 +427,16 @@ st.subheader("Safety Alarms")
 if safety_result["alarms"]:
 
     for alarm in safety_result["alarms"]:
-        st.error(f"🚨 {alarm}")
+
+        st.error(
+            f"ALARM: {alarm}"
+        )
 
 else:
-    st.info("No active alarms.")
+
+    st.info(
+        "No active alarms."
+    )
 
 
 # ============================================================
@@ -385,21 +448,26 @@ st.subheader("System Information")
 i1, i2, i3 = st.columns(3)
 
 with i1:
+
     st.metric(
         "Simulation Cycle",
         st.session_state.cycle
     )
 
 with i2:
+
     st.metric(
         "System State",
-        "RUNNING" if st.session_state.running else "STOPPED"
+        "RUNNING"
+        if st.session_state.running
+        else "STOPPED"
     )
 
 with i3:
+
     st.metric(
         "Safety State",
-        safety.status
+        safety_result["status"]
     )
 
 
@@ -419,9 +487,11 @@ st.write(
 
 
 # ============================================================
-# AUTO REFRESH
+# AUTOMATIC REFRESH
 # ============================================================
 
 if st.session_state.running:
+
     time.sleep(1)
+
     st.rerun()
