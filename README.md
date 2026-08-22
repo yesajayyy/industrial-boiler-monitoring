@@ -439,7 +439,7 @@ The embedded design can be extended to physical:
 
 The ATmega328P implementation can be simulated using Wokwi.
 
-[Open Wokwi Arduino Project](https://wokwi.com/projects/new/arduino-uno)
+[Open Wokwi Arduino Project](https://wokwi.com/projects/473076372219247617)
 
 > The provided Wokwi URL opens an Arduino Uno project entry point. A saved Wokwi project URL containing the final boiler implementation can replace this link when the final Wokwi project is published.
 
