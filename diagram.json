@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "author": "Guguloth Ajay",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno1", "top": 0, "left": 0, "attrs": {} },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": 80.23,
+      "left": 409.6,
+      "attrs": { "pins": "full" }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "temp1",
+      "top": -346.9,
+      "left": 556.6,
+      "attrs": { "value": "512" }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "pressure1",
+      "top": -230,
+      "left": 556,
+      "attrs": { "value": "512" }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "level1",
+      "top": -110,
+      "left": 556,
+      "attrs": { "value": "512" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledGreen",
+      "top": 82.8,
+      "left": -121,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledYellow",
+      "top": 150,
+      "left": -121,
+      "attrs": { "color": "yellow" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledRed",
+      "top": 226.8,
+      "left": -111.4,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "buzzer1",
+      "top": 300,
+      "left": 750,
+      "attrs": { "volume": "0.5" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "resetButton",
+      "top": 486,
+      "left": 749,
+      "attrs": { "color": "blue", "label": "RESET" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "burnerLED",
+      "top": 351.6,
+      "left": -101.8,
+      "attrs": { "color": "orange" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "pumpLED",
+      "top": 447.6,
+      "left": -111.4,
+      "attrs": { "color": "blue" }
+    }
+  ],
+  "connections": [
+    [ "lcd1:VSS", "uno1:GND.1", "black", [] ],
+    [ "lcd1:VDD", "uno1:5V", "red", [] ],
+    [ "lcd1:V0", "uno1:GND.1", "black", [] ],
+    [ "lcd1:RS", "uno1:8", "green", [] ],
+    [ "lcd1:E", "uno1:9", "green", [] ],
+    [ "lcd1:D4", "uno1:4", "green", [] ],
+    [ "lcd1:D5", "uno1:5", "green", [] ],
+    [ "lcd1:D6", "uno1:6", "green", [] ],
+    [ "lcd1:D7", "uno1:7", "green", [] ],
+    [ "lcd1:A", "uno1:5V", "red", [] ],
+    [ "lcd1:K", "uno1:GND.1", "black", [] ],
+    [ "temp1:VCC", "uno1:5V", "red", [] ],
+    [ "temp1:GND", "uno1:GND.1", "black", [] ],
+    [ "temp1:SIG", "uno1:A0", "orange", [] ],
+    [ "pressure1:VCC", "uno1:5V", "red", [] ],
+    [ "pressure1:GND", "uno1:GND.1", "black", [] ],
+    [ "pressure1:SIG", "uno1:A1", "blue", [] ],
+    [ "level1:VCC", "uno1:5V", "red", [] ],
+    [ "level1:GND", "uno1:GND.1", "black", [] ],
+    [ "level1:SIG", "uno1:A2", "purple", [] ],
+    [ "ledGreen:A", "uno1:10", "green", [] ],
+    [ "ledGreen:C", "uno1:GND.2", "black", [] ],
+    [ "ledYellow:A", "uno1:11", "yellow", [] ],
+    [ "ledYellow:C", "uno1:GND.2", "black", [] ],
+    [ "ledRed:A", "uno1:12", "red", [] ],
+    [ "ledRed:C", "uno1:GND.2", "black", [] ],
+    [ "buzzer1:1", "uno1:13", "orange", [] ],
+    [ "buzzer1:2", "uno1:GND.2", "black", [] ],
+    [ "resetButton:1.l", "uno1:2", "blue", [] ],
+    [ "resetButton:2.l", "uno1:GND.2", "black", [] ],
+    [ "burnerLED:A", "uno1:3", "orange", [] ],
+    [ "burnerLED:C", "uno1:GND.2", "black", [] ],
+    [ "pumpLED:A", "uno1:A3", "blue", [] ],
+    [ "pumpLED:C", "uno1:GND.2", "black", [] ]
+  ],
+  "dependencies": {}
+}
