@@ -539,6 +539,95 @@ Automated Testing            COMPLETE
 GitHub Integration           COMPLETE
 Documentation                IN PROGRESS
 
+---
+
+## System Architecture
+
+```mermaid
+flowchart TD
+
+    A["Boiler Process Simulation"] --> B["Instrumentation"]
+
+    B --> C["4-20 mA Signal Representation"]
+
+    C --> D["Signal Processing"]
+
+    D --> E["Process Variables"]
+
+    E --> F["Controller"]
+    E --> G["Safety System"]
+
+    F --> H["Actuators"]
+    G --> H
+
+    H --> I["Heater"]
+    H --> J["Feed Pump"]
+    H --> K["Control Valve"]
+
+    G --> L["Emergency Shutdown"]
+    G --> M["Alarm System"]
+
+    E --> N["Data Logger"]
+
+    N --> O["Process Data CSV"]
+    N --> P["Alarm Log CSV"]
+
+    O --> Q["Streamlit Dashboard"]
+    P --> Q
+
+    Q --> R["Real-Time Measurements"]
+    Q --> S["Process Trends"]
+    Q --> T["Actuator Status"]
+    Q --> U["Safety Status"]
+    Q --> V["Safety Alarms"]
+
+    W["ATmega328P / Wokwi Embedded Implementation"] --> X["Embedded Control Logic"]
+
+    X -. "Future hardware integration" .-> B
+```
+
+### Control and Safety Flow
+
+```text
+Boiler Process
+      |
+      v
+Sensors / Instrumentation
+      |
+      v
+4-20 mA Signal Processing
+      |
+      v
+Process Variables
+      |
+      +--------------------+
+      |                    |
+      v                    v
+ Automatic Controller    Safety System
+      |                    |
+      |                    +----> Emergency Trip
+      |                    |
+      |                    +----> Alarm
+      |                    |
+      v                    v
+ Heater / Pump / Valve  Safe Shutdown
+      |
+      v
+ Data Logger
+      |
+      v
+ Streamlit Dashboard
+```
+
+### Embedded Implementation
+
+The project also includes an **ATmega328P-based embedded implementation in Wokwi**. The embedded implementation demonstrates how the monitoring and control logic can be transferred from the Python simulation environment toward a microcontroller-based system.
+
+The current Streamlit dashboard uses the Python process simulation directly. The Wokwi ATmega328P implementation is maintained as the embedded hardware implementation and is not represented as a live serial connection to the dashboard.
+
+---
+
+
 
 Author
 Guguloth Ajay
