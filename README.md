@@ -400,7 +400,7 @@ http://localhost:8501
 
 ### Dashboard Access
 
-[Open Local Streamlit Dashboard](http://localhost:8501)
+[Open Local Streamlit Dashboard](https://industrial-boiler-dashboard.streamlit.app)
 
 > The localhost dashboard is available only while the Streamlit application is running on the local machine. It is not a publicly hosted web application.
 
